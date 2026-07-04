@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scale-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: scale-service
+    app.kubernetes.io/name: {{ include "scale-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: scale-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: scale-service
+    spec:
+      containers:
+      - name: scale-service
+        image: {{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}
+        imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.app.service.port }}
+        env:
+        - name: PORT
+          value: "{{ .Values.app.service.port }}"
+        resources:
+          {{- toYaml .Values.app.resources | nindent 10 }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.app.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.app.service.port }}
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scale-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: scale-service
+    app.kubernetes.io/name: {{ include "scale-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    app: scale-service
+  ports:
+  - port: {{ .Values.app.service.port }}
+    targetPort: {{ .Values.app.service.port }}
+  type: {{ .Values.service.type }}

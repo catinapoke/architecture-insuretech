@@ -25,14 +25,14 @@
     a. Создайте Locustfile. Это сценарий на Python, где вы определяете поведение пользователей. Создайте файл с именем `locustfile.py` в удобной для вас директории. Скопируйте туда код:
     
     ```
-         from locust import HttpUser, between, task
-     
-         class WebsiteUser(HttpUser):
-             wait_time = between(1, 5)
-       
-             @task
-             def index(self):
-                 self.client.get("/") 
+        from locust import HttpUser, between, task
+
+        class WebsiteUser(HttpUser):
+            wait_time = between(1, 5)
+
+            @task
+            def index(self):
+                self.client.get("/") 
     ```
     
     Этот пример создаёт класс пользователя, который переходит на главную страницу (`"/"`) с интервалом между запросами от 1 до 5 секунд.
