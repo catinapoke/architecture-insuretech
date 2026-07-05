@@ -71,3 +71,6 @@ XREADGROUP GROUP osago-group worker-{pod-name} COUNT 100 BLOCK 0 STREAMS osago:r
 
 Те что обработал отправляем сообщение в Кафку и выполняем XCLAIM (или истекшим)
 XCLAIM osago:requests osago-group worker-2 IDLE 0 "1689234005111-0" "1689234007222-0"
+
+## Итоговая диаграмма
+![](с4-container.drawio.png)
