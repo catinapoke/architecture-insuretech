@@ -8,7 +8,10 @@ metadata:
     app.kubernetes.io/name: {{ include "scale-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
+  revisionHistoryLimit: 1
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: scale-service
@@ -60,6 +63,27 @@ spec:
   selector:
     app: scale-service
   ports:
-  - port: {{ .Values.app.service.port }}
+  - name: http
+    port: {{ .Values.app.service.port }}
     targetPort: {{ .Values.app.service.port }}
   type: {{ .Values.service.type }}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scale-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    release: prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.global.namespace }}
+  selector:
+    matchLabels:
+      app: scale-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

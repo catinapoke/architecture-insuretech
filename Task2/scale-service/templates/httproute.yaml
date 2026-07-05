@@ -5,6 +5,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "scale-service.labels" . | nindent 4 }}
   {{- with .Values.httpRoute.annotations }}

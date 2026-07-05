@@ -1,8 +1,12 @@
+{{- $defaultServiceName := include "scale-service.fullname" . -}}
+{{- $defaultServicePort := .Values.service.port -}}
+
 {{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "scale-service.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "scale-service.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -29,15 +33,13 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
             backend:
               service:
-                name: {{ include "scale-service.fullname" $ }}
+                name: {{ .service | default $defaultServiceName }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ .port | default $defaultServicePort }}
           {{- end }}
     {{- end }}
 {{- end }}
