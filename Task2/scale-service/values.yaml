@@ -142,8 +142,14 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 10
-  # targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  basic:
+    enabled: false
+    # targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  rps:
+    enabled: true
+    metricName: http_requests_per_second
+    averageValue: 5000m
 
 # Additional volumes on the output Deployment definition.
 volumes: []

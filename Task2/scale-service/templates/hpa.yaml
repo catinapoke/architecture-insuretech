@@ -14,20 +14,29 @@ spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
-    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.autoscaling.rps.enabled }}
+    - type: Pods
+      pods:
+        metric:
+          name: {{ .Values.autoscaling.rps.metricName | quote }}
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.autoscaling.rps.averageValue | quote }}
+    {{- end }}
+    {{- if and .Values.autoscaling.basic.enabled .Values.autoscaling.basic.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.autoscaling.basic.targetCPUUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- if and .Values.autoscaling.basic.enabled .Values.autoscaling.basic.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ .Values.autoscaling.basic.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}
